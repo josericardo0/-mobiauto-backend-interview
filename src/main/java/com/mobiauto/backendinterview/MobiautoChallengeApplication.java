@@ -7,13 +7,12 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfi
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
-@EnableJpaRepositories(basePackages = "repository")
-@EntityScan(basePackages = "model")
 
-@SpringBootApplication(scanBasePackages = {"config", "controller", "enums", "exceptionhandler", "service", "service.impl", "messages", "dto"})
+@SpringBootApplication
 public class MobiautoChallengeApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(MobiautoChallengeApplication.class, args);
 	}
+
 }
