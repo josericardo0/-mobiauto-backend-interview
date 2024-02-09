@@ -2,10 +2,10 @@ package model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import enums.Funcoes;
-import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 
+import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 

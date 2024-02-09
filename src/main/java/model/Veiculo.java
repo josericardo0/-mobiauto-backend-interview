@@ -1,7 +1,10 @@
 package model;
 
-import jakarta.persistence.*;
-
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.GenerationType;
 
 @Entity
 @Table(name = "veículos")

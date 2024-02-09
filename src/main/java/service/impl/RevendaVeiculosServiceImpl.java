@@ -2,7 +2,7 @@ package service.impl;
 
 import enums.Status;
 import exceptionhandler.NegocioException;
-import jakarta.transaction.Transactional;
+import javax.transaction.Transactional;
 import messages.MensagensCustomizadas;
 import model.Oportunidades;
 import model.RevendaVeiculos;

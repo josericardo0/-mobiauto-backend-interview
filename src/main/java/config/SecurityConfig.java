@@ -1,7 +1,7 @@
 package config;
 
 import filter.JWTFilter;
-import jakarta.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -23,7 +23,7 @@ import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 import enums.Funcoes;
-import service.JWTService;
+import service.impl.JWTServiceImpl;
 
 import java.util.Arrays;
 import java.util.List;
@@ -36,7 +36,7 @@ public class SecurityConfig {
     private UserDetailsService userDetailsService;
 
     @Autowired
-    private JWTService jwtService;
+    private JWTServiceImpl jwtService;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -54,13 +54,13 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
                         .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
-                        .requestMatchers(HttpMethod.GET, "/actuator/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/usuarios/autenticar").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/clientes").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/veiculos").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/oportunidades").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/revenda").hasAnyRole(Funcoes.ADMINISTRADOR.toString(), Funcoes.PROPRIETARIO_LOJA.toString())
-                        .requestMatchers(HttpMethod.POST, "/usuarios").hasAnyRole(Funcoes.ADMINISTRADOR.toString(), Funcoes.PROPRIETARIO_LOJA.toString(), Funcoes.GERENTE.toString())
+                        .antMatchers(HttpMethod.GET, "/actuator/**").permitAll()
+                        .antMatchers(HttpMethod.POST, "/usuarios/autenticar").permitAll()
+                        .antMatchers(HttpMethod.POST, "/clientes").permitAll()
+                        .antMatchers(HttpMethod.POST, "/veiculos").permitAll()
+                        .antMatchers(HttpMethod.POST, "/oportunidades").permitAll()
+                        .antMatchers(HttpMethod.POST, "/revenda").hasAnyRole(Funcoes.ADMINISTRADOR.toString(), Funcoes.PROPRIETARIO_LOJA.toString())
+                        .antMatchers(HttpMethod.POST, "/usuarios").hasAnyRole(Funcoes.ADMINISTRADOR.toString(), Funcoes.PROPRIETARIO_LOJA.toString(), Funcoes.GERENTE.toString())
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -88,11 +88,9 @@ public class SecurityConfig {
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
-        return (web) -> web.ignoring().requestMatchers(
-                "/v3/api-docs",
-                "/configuration/ui",
-                "/swagger-resources/**",
-                "/configuration/security",
+        return (web) -> web.ignoring().antMatchers(
+                "/v3/api-docs/**",
+                "/swagger-ui/**",
                 "/swagger-ui.html",
                 "/webjars/**");
     }
