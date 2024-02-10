@@ -27,7 +27,7 @@ public class JWTServiceImpl implements JWTService {
 
     @Override
     public String criarToken(Usuario usuario) {
-        long exp = Long.valueOf(tokenExpiracao);
+        long exp = Long.parseLong(tokenExpiracao);
         LocalDateTime horaEDataExpiracaoToken = LocalDateTime.now().plusMinutes(exp);
         Instant instant = horaEDataExpiracaoToken.atZone( ZoneId.systemDefault() ).toInstant();
         java.util.Date data = Date.from(instant);
@@ -36,13 +36,10 @@ public class JWTServiceImpl implements JWTService {
                 .format(DateTimeFormatter.ofPattern("HH:mm"));
 
         String token = Jwts
-                .builder()
-                .setExpiration(data)
-                .setSubject(usuario.getEmail())
+                .builder().expiration(data).subject(usuario.getEmail())
                 .claim("id_usuario", usuario.getId())
                 .claim("nome_usuario", usuario.getNome())
-                .claim("hora_expiracao", horaExpiracaoToken)
-                .signWith( SignatureAlgorithm.HS512 , tokenAssinatura )
+                .claim("hora_expiracao", horaExpiracaoToken).signWith(SignatureAlgorithm.HS512, tokenAssinatura)
                 .compact();
 
         return token;

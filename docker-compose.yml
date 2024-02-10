@@ -1,9 +1,13 @@
 version: '3'
 services:
   springboot-app:
-    image: backendinterview:latest
+    build:
+      context: ./
+      dockerfile: Dockerfile
     ports:
       - "8080:8080"
+    networks:
+      - mobiauto-net
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db:5432/mobiauto
       - SPRING_DATASOURCE_USERNAME=admin
@@ -16,7 +20,11 @@ services:
     container_name: postgres-db
     ports:
       - "5432:5432"
+    networks:
+      - mobiauto-net
     environment:
       - POSTGRES_DB=mobiauto
       - POSTGRES_USER=admin
       - POSTGRES_PASSWORD=admin
+networks:
+  mobiauto-net:
