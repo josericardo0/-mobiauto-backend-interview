@@ -1,9 +1,10 @@
 package service;
 
-import static org.junit.jupiter.api.Assertions.*;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 import model.Usuario;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,22 +12,26 @@ import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
 import org.springframework.test.util.ReflectionTestUtils;
 import service.impl.JWTServiceImpl;
+import java.security.Key;
+import java.util.Base64;
 
-import java.nio.charset.StandardCharsets;
+import static org.junit.jupiter.api.Assertions.*;
 
 class JWTServiceTest {
 
     @InjectMocks
     private JWTServiceImpl jwtService;
 
-    private final String tokenAssinatura = "testKey";
+    private Key tokenAssinatura;
     private final String tokenExpiracao = "60";
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+        tokenAssinatura = Keys.secretKeyFor(SignatureAlgorithm.HS512);
+        String encodedKey = Base64.getEncoder().encodeToString(tokenAssinatura.getEncoded());
         ReflectionTestUtils.setField(jwtService, "tokenExpiracao", tokenExpiracao);
-        ReflectionTestUtils.setField(jwtService, "tokenAssinatura", tokenAssinatura);
+        ReflectionTestUtils.setField(jwtService, "tokenAssinatura", encodedKey); // Use encodedKey here
     }
 
     @Test
@@ -41,14 +46,14 @@ class JWTServiceTest {
         assertFalse(token.isEmpty());
 
         Jws<Claims> claims = Jwts.parser()
-                .setSigningKey(tokenAssinatura.getBytes(StandardCharsets.UTF_8))
-                .build().parseSignedClaims(token);
+                .setSigningKey(tokenAssinatura)
+                .build()
+                .parseClaimsJws(token);
 
-        assertEquals(usuario.getEmail(), claims.getPayload().getSubject());
-        assertEquals(usuario.getId().toString(), claims.getPayload().get("id_usuario", String.class));
-        assertEquals(usuario.getNome(), claims.getPayload().get("nome_usuario", String.class));
+        assertEquals(usuario.getEmail(), claims.getBody().getSubject());
+        assertEquals(usuario.getId().toString(), claims.getBody().get("id_usuario", String.class));
+        assertEquals(usuario.getNome(), claims.getBody().get("nome_usuario", String.class));
     }
-
 
     @Test
     void testTokenValido() {
@@ -62,7 +67,6 @@ class JWTServiceTest {
     @Test
     void testTokenExpirado() {
         ReflectionTestUtils.setField(jwtService, "tokenExpiracao", "-1");
-
         Usuario usuario = new Usuario();
         usuario.setEmail("expired@example.com");
         usuario.setId(2L);
@@ -73,7 +77,6 @@ class JWTServiceTest {
 
         assertFalse(jwtService.tokenValido(expiredToken));
     }
-
 
     @Test
     void testReceberLogin() {

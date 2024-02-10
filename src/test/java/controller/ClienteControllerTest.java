@@ -17,8 +17,9 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import service.ClienteService;
+import org.springframework.data.domain.PageRequest;
+import java.util.Arrays;
 
-import java.util.Collections;
 
 public class ClienteControllerTest {
 
@@ -40,14 +41,22 @@ public class ClienteControllerTest {
 
     @Test
     public void listarClientes_retornaTodosOsClientes() throws Exception {
-        Page<Cliente> page = new PageImpl<>(Collections.singletonList(new Cliente(/* set properties */)));
+        Cliente clienteExample = new Cliente(/* set properties as needed */);
+        Page<Cliente> page = new PageImpl<>(Arrays.asList(clienteExample), PageRequest.of(0, 5), 1);
+
         when(clienteService.listarTodosOsClientes(any())).thenReturn(page);
 
         mockMvc.perform(get("/clientes")
+                        .param("page", "0")
+                        .param("size", "5")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content").exists());
+                .andExpect(jsonPath("$.content").exists()) // Checks that content array exists
+                .andExpect(jsonPath("$.content[0].id").value(clienteExample.getId())) // Example of checking a field
+                .andExpect(jsonPath("$.totalPages").value(1)) // Checks totalPages
+                .andExpect(jsonPath("$.totalElements").value(1)); // Checks totalElements
     }
+
 
     @Test
     public void listarClientePorId_retornaClientePorId() throws Exception {
@@ -63,15 +72,17 @@ public class ClienteControllerTest {
     @Test
     public void cadastrarCliente_retornaClienteCadastrado() throws Exception {
         Cliente clienteToSave = new Cliente(/* set properties */);
-        Cliente savedCliente = new Cliente(/* set properties, including id */);
+        Cliente savedCliente = new Cliente(/* set properties */);
+        savedCliente.setId(1L);
         when(clienteService.cadastarCliente(any(Cliente.class))).thenReturn(savedCliente);
 
         mockMvc.perform(post("/clientes")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(clienteToSave)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").exists());
+                .andExpect(jsonPath("$.id").exists()); // Now this should pass
     }
+
 
     @Test
     public void modificarCliente_quandoEncontrado_retornaClienteModificado() throws Exception {

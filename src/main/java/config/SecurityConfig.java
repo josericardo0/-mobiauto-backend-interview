@@ -28,7 +28,6 @@ import service.impl.JWTServiceImpl;
 import java.util.Arrays;
 import java.util.List;
 
-@Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 

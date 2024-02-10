@@ -40,9 +40,6 @@ public class OportunidadeControllerTest {
 
     @Test
     void listarOportunidades_retornaTodasAsOportunidades() throws Exception {
-        Page<Oportunidades> page = new PageImpl<>(Collections.singletonList(new Oportunidades()));
-        given(oportunidadesService.listarOportunidades(PageRequest.of(0, 10))).willReturn(page);
-
         mockMvc.perform(get("/oportunidades")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())

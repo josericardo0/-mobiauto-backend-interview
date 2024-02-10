@@ -13,6 +13,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Base64;
 import java.util.Date;
 
 
@@ -55,12 +56,10 @@ public class JWTServiceImpl implements JWTService {
 
 
     public Claims obterClaims(String token) throws ExpiredJwtException {
-        return Jwts
-                .parser()
-                .setSigningKey(tokenAssinatura)
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+        byte[] keyBytes = Base64.getDecoder().decode(tokenAssinatura);
+        return Jwts.parser()
+                .setSigningKey(keyBytes)
+                .build().parseSignedClaims(token).getPayload();
     }
 
 
