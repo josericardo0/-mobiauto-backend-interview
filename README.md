@@ -1,11 +1,10 @@
-# Desafio técnico da Mobiauto
+# Desafio técnico da Mobiauto - Sistema de Revendas de Veículos
 
-## Sistema de Revendas de Veículos
-- Desafio proposto para a vaga de desenvolvedor backend na empresa Mobiauto. 
-  - Basicamente se trata de uma API com Java e Spring Boot para a gestão de revendas de veículos
-  - Possui todas as operações de CRUD e regras de negócio devidas.
+Desafio proposto para a vaga de desenvolvedor backend na empresa Mobiauto. Basicamente se trata de uma API com Java e Spring Boot para o gerenciamento de revendas de veículos, com todas as operações de CRUD e regras de negócio devidas.
 
-### Requisitos técnicos do sistema
+
+
+## Requisitos técnicos do sistema
 
 - **Gestão de Revendas:** Cada Revenda deve possuir um código identificador único. O CNPJ da Revenda deve ser válido e único. A Revenda deve ter um nome social.
 
@@ -29,24 +28,20 @@ gerentes e proprietários que têm permissão para editar todas as oportunidades
 sua loja. Deve ser registrada a data de atribuição da oportunidade pelo seu responsável e a
 data de conclusão.
 
-### Como testar a aplicação:
+## Como testar a aplicação:
 
-- Faça o clone do repositório na sua máquina
-  - Numa pasta da sua escolha, ou baixe o arquivo `zip` 
-  - Extraia e abra a pasta resultante da extração na sua IDE.
-- Visto que estiver com o projeto aberto
-  - Execute o comando `gradle build` no terminal (sem as aspas) para buildar.
-- Abra no terminal a pasta `resources` do projeto backendinterview (a pasta está abaixo da pasta `java`). 
-  - Certifique-se que está abrindo o caminho completo até a pasta `resources`.
-- Visto que estiver a acessar a pasta no terminal
-  - Execute o comando `docker-compose up --build` para buildar e subir o contêiner logo em seguida
-  - Para que assim possa testar as funcionalidades da API.
+- Faça o clone do repositório na sua máquina, em uma pasta de sua escolha, ou baixe o .zip, extraia e abre a pasta resultante da extração na sua IDE.
+- Certifique de trocar os caminhos especificados no docker-compose em "context" e "dockerfile" de acordo com a localização do diretório do projeto na sua máquina.
+- Uma vez que estiver com o projeto aberto, execute "gradle build" no terminal (sem as aspas) para buildar.
+- Agora abra no terminal a pasta "resources" do projeto backendinterview (a pasta está abaixo da pasta "java"). Certifique-se que está abrindo o caminho completo até a pasta "resources".
+- Uma vez que estiver acessando a pasta dentro do terminal, execute o comando docker-compose up --build para buildar e subir o contêiner logo em seguida, para que assim possa testar as funcionalidades da API.
+- É gerado um usuário com o perfil de adminstrador ao iniciar a aplicação, permitindo assim testar os endpoints.
 - Acessar a URL de cada endpoint para fins de teste, exemplo: /usuarios, /oportunidades, /clientes.
 
   
-### Especificações técnicas:
+## Especificações técnicas:
 
-- **Versão do Java:** Java 21
-- **Versão do Spring Boot:** 3.2.2
+- **Versão do Java:** Java 17
+- **Versão do Spring Boot:** 3.1.8
 - **Gerenciador de dependências:** Gradle
 - **Banco de dados:** PostgreSQL
