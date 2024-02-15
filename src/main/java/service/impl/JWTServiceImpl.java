@@ -4,82 +4,92 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 import model.Usuario;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import service.JWTService;
-
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.Base64;
+import io.jsonwebtoken.MalformedJwtException;
+import javax.crypto.SecretKey;
 import java.util.Date;
-
 
 @Service
 public class JWTServiceImpl implements JWTService {
 
-    @Value("${jwt.token-expiracao}")
-    private String tokenExpiracao;
-
     @Value("${jwt.token-assinatura}")
-    private String tokenAssinatura;
+    private String secret;
+
+    private SecretKey getSecretKey() {
+        return Keys.hmacShaKeyFor(secret.getBytes());
+    }
 
     @Override
     public String criarToken(Usuario usuario) {
-        long exp = Long.valueOf(tokenExpiracao);
-        LocalDateTime horaEDataExpiracaoToken = LocalDateTime.now().plusMinutes(exp);
-        Instant instant = horaEDataExpiracaoToken.atZone( ZoneId.systemDefault() ).toInstant();
-        java.util.Date data = Date.from(instant);
+        long expirationTime = 7200000;
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + expirationTime);
 
-        String horaExpiracaoToken = horaEDataExpiracaoToken.toLocalTime()
-                .format(DateTimeFormatter.ofPattern("HH:mm"));
+        String funcoesAsString = usuario.getFuncoes().name();
 
-        String token = Jwts
-                .builder()
-                .setExpiration(data)
-                .setSubject(usuario.getEmail())
-                .claim("id_usuario", usuario.getId())
-                .claim("nome_usuario", usuario.getNome())
-                .claim("hora_expiracao", horaExpiracaoToken)
-                .signWith( SignatureAlgorithm.HS512 , tokenAssinatura )
+        return Jwts.builder()
+                .setIssuer("mobiauto")
+                .setSubject(funcoesAsString)
+                .setIssuedAt(new Date())
+                .setExpiration(expiryDate)
+                .signWith(getSecretKey(), SignatureAlgorithm.HS256)
                 .compact();
-
-        return token;
     }
+
 
     @Override
     public Claims receberClaims(String token) throws ExpiredJwtException {
-        return null;
+        return Jwts.parserBuilder()
+                .setSigningKey(getSecretKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
     }
 
-
-    public Claims obterClaims(String token) throws ExpiredJwtException {
-        byte[] keyBytes = Base64.getDecoder().decode(tokenAssinatura);
-        return Jwts.parser()
-                .setSigningKey(keyBytes)
-                .build().parseSignedClaims(token).getPayload();
-    }
 
 
     @Override
     public boolean tokenValido(String token) {
         try {
-            Claims claims = obterClaims(token);
-            java.util.Date dataExemplo = claims.getExpiration();
-            LocalDateTime tokenDataExpiracao = dataExemplo.toInstant()
-                    .atZone(ZoneId.systemDefault()).toLocalDateTime();
-            boolean dataHoraAtualDepoisDaDataDeExpiracao = LocalDateTime.now().isAfter(tokenDataExpiracao);
-            return !dataHoraAtualDepoisDaDataDeExpiracao;
-        }catch(ExpiredJwtException e) {
+            Jwts.parserBuilder().setSigningKey(getSecretKey()).build().parseClaimsJws(token);
+            return true;
+        } catch (ExpiredJwtException | io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
             return false;
         }
     }
+
+
 
     @Override
     public String receberLogin(String token) {
         Claims claims = receberClaims(token);
         return claims.getSubject();
+    }
+
+    @Override
+    public String refreshToken(String token) {
+        Claims claims = receberClaims(token);
+        Date agora = new Date();
+        Date dataExpiracao = new Date(agora.getTime() + 7200000);
+
+        return Jwts.builder()
+                .setIssuer("mobiauto")
+                .setSubject(claims.getSubject())
+                .setIssuedAt(agora)
+                .setExpiration(dataExpiracao)
+                .signWith(getSecretKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+
+
+    @Override
+    public Date getTokenExpiration(String token) {
+        Claims claims = receberClaims(token);
+        return claims.getExpiration();
     }
 }

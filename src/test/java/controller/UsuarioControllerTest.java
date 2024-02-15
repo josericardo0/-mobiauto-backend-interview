@@ -1,3 +1,4 @@
+import com.mobiauto.backendinterview.MobiautoChallengeApplication;
 import dto.AcessoDTO;
 import dto.JwtDTO;
 import dto.UsuarioDTO;
@@ -8,23 +9,26 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 import service.JWTService;
 import service.UsuarioService;
 
 import java.util.List;
+import java.util.Optional;
 
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+
 @ExtendWith(MockitoExtension.class)
-@SpringBootTest
-@AutoConfigureMockMvc
+@SpringBootTest(classes = MobiautoChallengeApplication.class)
 public class UsuarioControllerTest {
 
     @Autowired
@@ -40,9 +44,10 @@ public class UsuarioControllerTest {
     private Usuario usuario;
     private UsuarioDTO usuarioDTO;
     private String token;
-
+    private WebApplicationContext webApplicationContext;
     @BeforeEach
     public void setup() {
+        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).apply(springSecurity()).build();
         dto = new AcessoDTO();
         dto.setEmail("user@example.com");
         dto.setSenha("password");
@@ -112,7 +117,7 @@ public class UsuarioControllerTest {
         Long userId = 1L;
         usuario.setId(userId);
 
-        Mockito.when(usuarioService.listarUsuarioPorId(userId)).thenReturn(java.util.Optional.of(usuario));
+        Mockito.when(usuarioService.listarUsuarioPorId(userId)).thenReturn(Optional.of(usuario));
 
         mockMvc.perform(get("/usuarios/{id}", userId)
                         .contentType(MediaType.APPLICATION_JSON))

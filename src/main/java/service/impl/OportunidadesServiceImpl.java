@@ -3,7 +3,7 @@ package service.impl;
 import enums.Funcoes;
 import enums.Status;
 import exceptionhandler.NegocioException;
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 import messages.MensagensCustomizadas;
 import model.*;
 import org.springframework.data.domain.Page;

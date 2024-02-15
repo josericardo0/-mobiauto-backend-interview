@@ -1,11 +1,11 @@
 package model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import dto.UsuarioDTO;
 import enums.Funcoes;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
-
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -30,6 +30,7 @@ public class Usuario {
     @NotEmpty(message = "{campo.obrigatorio}")
     private String senha;
 
+
     @Enumerated(EnumType.STRING)
     private Funcoes funcoes;
 
@@ -39,6 +40,12 @@ public class Usuario {
             joinColumns = @JoinColumn(name = "id_usuario"),
             inverseJoinColumns = @JoinColumn(name = "id_revenda"))
     private Set<RevendaVeiculos> revendaVeiculos = new HashSet<>();
+
+    public Usuario(UsuarioDTO data) {
+    }
+
+    public Usuario() {
+    }
 
     public Long getId() {
         return id;

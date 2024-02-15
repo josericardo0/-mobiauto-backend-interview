@@ -1,23 +1,34 @@
+import com.mobiauto.backendinterview.MobiautoChallengeApplication;
 import model.Veiculo;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import service.VeiculoService;
 
-import java.util.List;
+import java.util.Collections;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@ExtendWith(MockitoExtension.class)
+
+
+@SpringBootTest(classes = MobiautoChallengeApplication.class)
+@AutoConfigureMockMvc
 public class VeiculoControllerTest {
 
     @Autowired
@@ -28,8 +39,8 @@ public class VeiculoControllerTest {
 
     @Test
     public void testListarTodosOsVeiculos() throws Exception {
-        Page<Veiculo> veiculos = new PageImpl<>(List.of(new Veiculo()));
-        Mockito.when(veiculoService.listarTodosOsVeiculos(Mockito.any(PageRequest.class))).thenReturn(veiculos);
+        Page<Veiculo> veiculos = new PageImpl<>(Collections.singletonList(new Veiculo()));
+        Mockito.when(veiculoService.listarTodosOsVeiculos(any(PageRequest.class))).thenReturn(veiculos);
 
         mockMvc.perform(get("/veiculos")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -40,7 +51,7 @@ public class VeiculoControllerTest {
     @Test
     public void testObterVeiculoPorIdSuccess() throws Exception {
         Veiculo veiculo = new Veiculo();
-        Mockito.when(veiculoService.listarVeiculoPorId(Mockito.anyLong())).thenReturn(java.util.Optional.of(veiculo));
+        Mockito.when(veiculoService.listarVeiculoPorId(anyLong())).thenReturn(java.util.Optional.of(veiculo));
 
         mockMvc.perform(get("/veiculos/{id}", 1L)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -51,11 +62,11 @@ public class VeiculoControllerTest {
     @Test
     public void testCriarVeiculo() throws Exception {
         Veiculo veiculo = new Veiculo();
-        Mockito.when(veiculoService.cadastrarVeiculo(Mockito.any(Veiculo.class))).thenReturn(veiculo);
+        Mockito.when(veiculoService.cadastrarVeiculo(any(Veiculo.class))).thenReturn(veiculo);
 
         mockMvc.perform(post("/veiculos")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{}"))
+                        .content("{\"nome\":\"Test Veiculo\",\"tipo\":\"Carro\"}"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$").exists());
     }
@@ -63,17 +74,17 @@ public class VeiculoControllerTest {
     @Test
     public void testModificarVeiculoSuccess() throws Exception {
         Veiculo veiculo = new Veiculo();
-        Mockito.when(veiculoService.modificarVeiculo(Mockito.eq(1L), Mockito.any(Veiculo.class))).thenReturn(veiculo);
+        Mockito.when(veiculoService.modificarVeiculo(anyLong(), any(Veiculo.class))).thenReturn(veiculo);
 
         mockMvc.perform(put("/veiculos/{id}", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{}"))
+                        .content("{\"nome\":\"Updated Veiculo\",\"tipo\":\"Carro\"}"))
                 .andExpect(status().isOk());
     }
 
     @Test
     public void testDeletarVeiculoSuccess() throws Exception {
-        Mockito.doNothing().when(veiculoService).deletarVeiculo(Mockito.anyLong());
+        Mockito.doNothing().when(veiculoService).deletarVeiculo(anyLong());
 
         mockMvc.perform(delete("/veiculos/{id}", 1L))
                 .andExpect(status().isNoContent());

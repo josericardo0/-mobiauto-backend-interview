@@ -1,9 +1,12 @@
 package dto;
 
+
 public class AcessoDTO {
 
     private String email;
     private String senha;
+
+    private String login;
 
     public String getEmail() {
         return email;
@@ -19,5 +22,9 @@ public class AcessoDTO {
 
     public void setSenha(String senha) {
         this.senha = senha;
+    }
+
+    public String getLogin() {
+        return login;
     }
 }

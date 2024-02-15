@@ -1,16 +1,12 @@
 package model;
 
-import jakarta.validation.constraints.NotBlank;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.persistence.GenerationType;
+
 import java.util.List;
+
+import jakarta.validation.constraints.NotBlank;
 import org.hibernate.validator.constraints.br.CNPJ;
-import javax.persistence.Column;
-import javax.persistence.OneToMany;
-import javax.persistence.CascadeType;
+import jakarta.persistence.*;
+
 @Table(name = "revenda_veiculos")
 @Entity
 public class RevendaVeiculos {
@@ -26,8 +22,9 @@ public class RevendaVeiculos {
     @NotBlank
     private String nomeSocial;
 
-    @OneToMany(mappedBy = "revenda_veiculo", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "revendaVeiculos", cascade = CascadeType.ALL)
     private List<Oportunidades> oportunidades;
+
 
     public Long getId() {
         return id;

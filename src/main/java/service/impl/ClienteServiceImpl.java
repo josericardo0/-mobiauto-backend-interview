@@ -1,7 +1,7 @@
 package service.impl;
 
 import exceptionhandler.NegocioException;
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 import model.Cliente;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

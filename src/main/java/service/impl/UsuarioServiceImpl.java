@@ -2,7 +2,7 @@ package service.impl;
 
 import exceptionhandler.AcessoException;
 import exceptionhandler.NegocioException;
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 import messages.MensagensCustomizadas;
 import model.Usuario;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -12,6 +12,13 @@ public class UsuarioDTO {
     private String email;
     private String senha;
     private Funcoes funcoes;
+
+    public String login;
+
+    public void setLogin(String login) {
+        this.login = login;
+    }
+
     private Set<RevendaVeiculos> revendaVeiculos = new HashSet<>();
 
     public UsuarioDTO(Usuario usuario) {
@@ -65,5 +72,9 @@ public class UsuarioDTO {
 
     public void setRevendaVeiculos(Set<RevendaVeiculos> revendaVeiculos) {
         this.revendaVeiculos = revendaVeiculos;
+    }
+
+    public String getLogin() {
+        return null;
     }
 }

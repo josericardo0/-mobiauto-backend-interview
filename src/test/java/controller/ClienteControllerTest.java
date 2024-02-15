@@ -14,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import service.ClienteService;
@@ -41,21 +42,22 @@ public class ClienteControllerTest {
 
     @Test
     public void listarClientes_retornaTodosOsClientes() throws Exception {
-        Cliente clienteExample = new Cliente(/* set properties as needed */);
+        Cliente clienteExample = new Cliente();
         Page<Cliente> page = new PageImpl<>(Arrays.asList(clienteExample), PageRequest.of(0, 5), 1);
 
-        when(clienteService.listarTodosOsClientes(any())).thenReturn(page);
+        when(clienteService.listarTodosOsClientes(any(Pageable.class))).thenReturn(page);
 
         mockMvc.perform(get("/clientes")
                         .param("page", "0")
                         .param("size", "5")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content").exists()) // Checks that content array exists
-                .andExpect(jsonPath("$.content[0].id").value(clienteExample.getId())) // Example of checking a field
-                .andExpect(jsonPath("$.totalPages").value(1)) // Checks totalPages
-                .andExpect(jsonPath("$.totalElements").value(1)); // Checks totalElements
+                .andExpect(jsonPath("$.content").exists())
+                .andExpect(jsonPath("$.content[0].id").value(clienteExample.getId()))
+                .andExpect(jsonPath("$.totalPages").value(1))
+                .andExpect(jsonPath("$.totalElements").value(1));
     }
+
 
 
     @Test

@@ -1,7 +1,5 @@
 package controller;
 
-import dto.AcessoDTO;
-import dto.JwtDTO;
 import dto.UsuarioDTO;
 import exceptionhandler.NegocioException;
 import jakarta.validation.Valid;
@@ -12,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-import service.JWTService;
 import service.UsuarioService;
 
 import java.util.List;
@@ -21,22 +18,12 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/usuarios")
 public class UsuarioController {
+
     private final UsuarioService usuarioService;
-    private final JWTService jwtService;
 
     @Autowired
-    public UsuarioController(UsuarioService usuarioService, JWTService jwtService) {
+    public UsuarioController(UsuarioService usuarioService) {
         this.usuarioService = usuarioService;
-        this.jwtService = jwtService;
-    }
-
-    @PostMapping("/autenticar")
-    @PreAuthorize("hasRole('ADMINISTRADOR') or hasRole('PROPRIETARIO_LOJA') or hasRole('GERENTE') or hasRole('ASSISTENTE')")
-    public ResponseEntity<JwtDTO> autenticar(@RequestBody @Valid AcessoDTO dto) {
-        Usuario usuarioAutenticado = usuarioService.autenticarUsuario(dto.getEmail(), dto.getSenha());
-        String token = jwtService.criarToken(usuarioAutenticado);
-        JwtDTO jwtDTO = new JwtDTO(usuarioAutenticado.getNome(), token);
-        return ResponseEntity.ok(jwtDTO);
     }
 
     @PostMapping
