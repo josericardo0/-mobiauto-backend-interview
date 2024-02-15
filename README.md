@@ -45,3 +45,7 @@ data de conclusão.
 - **Versão do Spring Boot:** 3.1.8
 - **Gerenciador de dependências:** Gradle
 - **Banco de dados:** PostgreSQL
+- 
+## Contato para suporte:
+- **Email:** gmnaarea@gmail.com
+- **Whatsapp:** 83987630307
