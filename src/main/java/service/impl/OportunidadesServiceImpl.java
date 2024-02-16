@@ -6,6 +6,7 @@ import exceptionhandler.NegocioException;
 import jakarta.transaction.Transactional;
 import messages.MensagensCustomizadas;
 import model.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
@@ -31,6 +32,7 @@ public class OportunidadesServiceImpl implements OportunidadesService {
 
     private final UsuarioService usuarioService;
 
+    @Autowired // Para o spring injetar automaticamente as depedencias
     public OportunidadesServiceImpl(OportunidadeRepository oportunidadeRepository, ClienteService clienteService, VeiculoService veiculoService, RevendaVeiculosService revendaVeiculosService, UsuarioService usuarioService) {
         this.oportunidadeRepository = oportunidadeRepository;
         this.clienteService = clienteService;
@@ -64,6 +66,7 @@ public class OportunidadesServiceImpl implements OportunidadesService {
     }
 
     @Override
+    @Transactional // C
     public Oportunidades modificarOportunidade(Long id, Oportunidades oportunidade, Usuario usuarioLogado) {
         return listarOportunidadesporId(id).map(oportunidadeExiste -> {
             validaEdicaoOportunidade(oportunidadeExiste, usuarioLogado);
@@ -81,8 +84,12 @@ public class OportunidadesServiceImpl implements OportunidadesService {
                 oportunidade.setStatus(Status.FINALIZADO);
                 oportunidadeExiste.setMotivoConclusao(oportunidade.getMotivoConclusao());
                 oportunidade.setDataAtribuicao(LocalDateTime.now());
-            } else {
-                oportunidadeExiste.setMotivoConclusao(null);
+
+                /**
+                 * Tirei o código else onde vocÊ seta o valor da conclusão como nulo
+                 * No bloco if você verifica se o motivo da conclusão é nulo, e lança uma exceção
+                 * Então setar nulo no else, forçaria o seu bloco if acontecer em alguns casos
+                 */
             }
 
             return this.cadastrarOportunidade(oportunidadeExiste);
@@ -135,6 +142,7 @@ public class OportunidadesServiceImpl implements OportunidadesService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public Oportunidades distribuicaoOportunidadesSemProprietario(Long revendaId, Oportunidades oportunidades) {
         Usuario proximoAssistente = proximoAssistente(revendaId);
 
@@ -153,27 +161,13 @@ public class OportunidadesServiceImpl implements OportunidadesService {
         RevendaVeiculos revendaVeiculos = this.revendaVeiculosService.listarRevendasPorId(revendaId)
                 .orElseThrow(() -> new NegocioException("Não foi encontrada uma revenda com o ID especificado"));
 
-        Set<Usuario> assistentes = revendaVeiculos.getOportunidades()
-                .stream()
-                .filter(oportunidades -> oportunidades != null &&
-                        oportunidades.getAtendimento() != null &&
-                        oportunidades.getAtendimento().getFuncoes().equals(Funcoes.ASSISTENTE))
-                .map(Oportunidades::getAtendimento)
-                .collect(Collectors.toSet());
-
-
-        Map<Usuario, Long> oportunidadesParaCadaAssistente = revendaVeiculos.getOportunidades()
-                .stream()
-                .filter(oportunidades -> oportunidades.getAtendimento() != null &&
-                        oportunidades.getAtendimento().getFuncoes().equals(Funcoes.ASSISTENTE))
-                .collect(Collectors.groupingBy(Oportunidades::getAtendimento, Collectors.counting()));
-
-        Map<Usuario, Long> oportunidades = null;
-        List<Usuario> assistentesEnfileirados = assistentes.stream()
-                .sorted(Comparator.<Usuario, Long>comparing(usuario -> oportunidadesParaCadaAssistente.getOrDefault(usuario, 0L))
-                        .thenComparing(usuario -> calcularTempoRecebimentoOportunidade(usuario, oportunidades), Comparator.reverseOrder()))
-                .collect(Collectors.toList());
-
+        /**
+         * A função estava muito verbosa, então decidi quebra-la em partes com pequenas funções
+         * Dessa forma facilita a legibilidade e manutenção do código
+         */
+        Set<Usuario> assistentes = this.getAssistentesPelaRevendaVeiculos(revendaVeiculos);
+        Map<Usuario, Long> oportunidadesParaCadaAssistente = this.getNumerosDeOportunidadesParaCadaAssistente(revendaVeiculos);
+        List<Usuario> assistentesEnfileirados = this.enfileirarAssistentesPeloTempoDeRecebimento(assistentes, oportunidadesParaCadaAssistente);
         return assistentesEnfileirados.isEmpty() ? null : assistentesEnfileirados.get(0);
     }
 
@@ -202,9 +196,37 @@ public class OportunidadesServiceImpl implements OportunidadesService {
             oportunidades.setStatus(Status.EM_ATENDIMENTO);
 
             return cadastrarOportunidade(oportunidades);
-        } else {
-            throw new NegocioException(MensagensCustomizadas.SEM_PERMISSAO_PARA_TRANSFERENCIA);
         }
+        /**
+         * Aqui não é necessário o bloco else, já que seu bloco if aplica o early returne, caso o bloco não aconteça, a exception será lançada
+         */
+        throw new NegocioException(MensagensCustomizadas.SEM_PERMISSAO_PARA_TRANSFERENCIA);
+}
+
+    private Set<Usuario> getAssistentesPelaRevendaVeiculos(RevendaVeiculos revendaVeiculos) {
+        return revendaVeiculos.getOportunidades()
+                .stream()
+                .filter(oportunidades -> oportunidades != null &&
+                        oportunidades.getAtendimento() != null &&
+                        oportunidades.getAtendimento().getFuncoes().equals(Funcoes.ASSISTENTE))
+                .map(Oportunidades::getAtendimento)
+                .collect(Collectors.toSet());
+
+    }
+
+    private Map<Usuario, Long> getNumerosDeOportunidadesParaCadaAssistente(RevendaVeiculos revendaVeiculos) {
+        return revendaVeiculos.getOportunidades()
+                .stream()
+                .filter(oportunidades -> oportunidades.getAtendimento() != null &&
+                        oportunidades.getAtendimento().getFuncoes().equals(Funcoes.ASSISTENTE))
+                .collect(Collectors.groupingBy(Oportunidades::getAtendimento, Collectors.counting()));
+    }
+
+    private  List<Usuario> enfileirarAssistentesPeloTempoDeRecebimento(Set<Usuario> assistentes,    Map<Usuario, Long> oportunidadesParaCadaAssistente) {
+        return assistentes.stream()
+                .sorted(Comparator.<Usuario, Long>comparing(usuario -> oportunidadesParaCadaAssistente.getOrDefault(usuario, 0L))
+                        .thenComparing(usuario -> calcularTempoRecebimentoOportunidade(usuario, oportunidadesParaCadaAssistente), Comparator.reverseOrder()))
+                .toList();
     }
 
 }
