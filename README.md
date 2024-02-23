@@ -33,8 +33,7 @@ data de conclusão.
 - Faça o clone do repositório na sua máquina, em uma pasta de sua escolha, ou baixe o .zip, extraia e abre a pasta resultante da extração na sua IDE.
 - Certifique de trocar os caminhos especificados no docker-compose em "context" e "dockerfile" de acordo com a localização do diretório do projeto na sua máquina.
 - Uma vez que estiver com o projeto aberto, execute "gradle build" no terminal (sem as aspas) para buildar.
-- Agora abra no terminal a pasta "resources" do projeto backendinterview (a pasta está abaixo da pasta "java"). Certifique-se que está abrindo o caminho completo até a pasta "resources".
-- Uma vez que estiver acessando a pasta dentro do terminal, execute o comando docker-compose up --build para buildar e subir o contêiner logo em seguida, para que assim possa testar as funcionalidades da API.
+- Execute o comando docker-compose up --build para buildar e subir o contêiner logo em seguida.
 - É gerado um usuário com o perfil de adminstrador ao iniciar a aplicação, permitindo assim testar os endpoints.
 - Acessar a URL de cada endpoint para fins de teste, exemplo: /usuarios, /oportunidades, /clientes.
 
@@ -45,7 +44,3 @@ data de conclusão.
 - **Versão do Spring Boot:** 3.1.8
 - **Gerenciador de dependências:** Gradle
 - **Banco de dados:** PostgreSQL
-- 
-## Contato para suporte:
-- **Email:** gmnaarea@gmail.com
-- **Whatsapp:** 83987630307
